@@ -13,6 +13,7 @@
 #include "src/lib/eModbus-eModbus/scripts/mbServerFCs.h"
 #include "src/lib/miwagner-ESP32-Arduino-CAN/CAN_config.h"
 #include "src/lib/miwagner-ESP32-Arduino-CAN/ESP32CAN.h"
+#include "src/mqtt/mqtt.h"
 
 #ifdef WEBSERVER
 #include "src/devboard/webserver/webserver.h"
@@ -128,6 +129,8 @@ void setup() {
   inform_user_on_inverter();
 
   inform_user_on_battery();
+
+  mqtt_setup();
 }
 
 // Perform main program functions
@@ -164,6 +167,8 @@ void loop() {
 #ifdef DUAL_CAN
   send_can2();
 #endif
+
+  mqtt_loop();
 }
 
 // Initialization functions

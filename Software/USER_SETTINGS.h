@@ -42,6 +42,16 @@
 //#define CONTACTOR_CONTROL     //Enable this line to have pins 25,32,33 handle automatic precharge/contactor+/contactor- closing sequence
 //#define PWM_CONTACTOR_CONTROL //Enable this line to use PWM logic for contactors, which lower power consumption and heat generation
 //#define DUAL_CAN              //Enable this line to activate an isolated secondary CAN Bus using add-on MCP2515 controller (Needed for FoxESS inverters)
-#define WEBSERVER  //Enable this line to enable WiFi, and to run the webserver
+//#define WEBSERVER  //Enable this line to enable WiFi, and to run the webserver
+
+/* MQTT options */
+#define ENABLE_MQTT
+#define WIFI_SSID           "my_ssid"
+#define WIFI_PSW            "my_s3cr3t_p4assw0rd"
+#define MQTT_SERVER         "192.168.xx.xyy"
+#define MQTT_PORT           1883
+#define MQTT_USER           "mqtt_user"
+#define MQTT_PSW            "longassmqttbrokerpassword"
+#define MQTT_SUBSCRIPTIONS  {"nuclear_missile/readiness", "topics/topic2", "something/else"}
 
 #endif
