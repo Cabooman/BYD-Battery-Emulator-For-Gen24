@@ -25,8 +25,8 @@ void publish_values(void) {
            "  \"StateOfHealth\": %.3f,\n"
            "  \"temperature_min\": %.3f,\n"
            "  \"temperature_max\": %.3f,\n"
-           "  \"cell_max_voltage\": %.3f,\n"
-           "  \"cell_min_voltage\": %.3f\n"
+           "  \"cell_max_voltage\": %d,\n"
+           "  \"cell_min_voltage\": %d\n"
            "}\n",
            ((float) SOC) / 100.0,
            ((float) StateOfHealth) / 100.0,
