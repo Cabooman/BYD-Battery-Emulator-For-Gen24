@@ -1,7 +1,7 @@
 #include <Arduino.h>
 #include <WiFi.h>
 #include "mqtt.h"
-#include "USER_SETTINGS.h"
+#include "../../USER_SETTINGS.h"
 
 #include "../lib/knolleary-pubsubclient/PubSubClient.h"
 
@@ -17,6 +17,7 @@ static unsigned long previousMillisUpdateVal;
 #define SECONDS 5
 
 #ifdef ENABLE_MQTT
+/** Publish global values and call callbacks for specific modules */
 void publish_values(void) {
 
     snprintf(msg, sizeof(msg),
