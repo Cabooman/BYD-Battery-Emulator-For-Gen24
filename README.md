@@ -1,3 +1,9 @@
+# THIS IS AN MQTT FORK!
+## Todo
+- Verify compilation with older board package
+- Verify battery temperature values at negative temperatures
+- Add callbacks for battery modules to enable them to publish battery-specific data to the MQTT broker
+
 # Battery-Emulator ⚡🔋
 ![GitHub release (with filter)](https://img.shields.io/github/v/release/dalathegreat/BYD-Battery-Emulator-For-Gen24?color=%23008000)
 ![GitHub Repo stars](https://img.shields.io/github/stars/dalathegreat/BYD-Battery-Emulator-For-Gen24?color=%23008000)
