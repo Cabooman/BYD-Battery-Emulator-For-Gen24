@@ -1,8 +1,11 @@
 # THIS IS AN MQTT FORK!
 ## Todo
-- Verify compilation with older board package
+- DONE - Verify compilation with older board package
 - Verify battery temperature values at negative temperatures
 - Add callbacks for battery modules to enable them to publish battery-specific data to the MQTT broker
+- DONE - Add Wifi connection timeout
+- Handle Wifi timeout by not executing MQTT functionality in mqtt_loop()
+- ENABLE_MQTT is probably incompatible with WEBSERVER, should add some compile-time check
 
 # Battery-Emulator ⚡🔋
 ![GitHub release (with filter)](https://img.shields.io/github/v/release/dalathegreat/BYD-Battery-Emulator-For-Gen24?color=%23008000)
