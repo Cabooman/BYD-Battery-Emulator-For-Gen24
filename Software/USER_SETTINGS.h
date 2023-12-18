@@ -44,7 +44,7 @@
 //#define DUAL_CAN              //Enable this line to activate an isolated secondary CAN Bus using add-on MCP2515 controller (Needed for FoxESS inverters)
 //#define WEBSERVER  //Enable this line to enable WiFi, and to run the webserver
 
-/* MQTT options */
+/* MQTT options, see mqtt.h for more information */
 #define ENABLE_MQTT
 #define WIFI_SSID           "my_ssid"
 #define WIFI_PSW            "my_s3cr3t_p4assw0rd"

@@ -1,3 +1,36 @@
+/**
+ * MQTT add-on for the battery emulator
+ * 
+ * Usage:
+ * 
+ * Subscription - Add topics to MQTT_SUBSCRIPTIONS in USER_SETTINGS.h and handle the messages in mqtt.cpp:callback()
+ * 
+ * Publishing - See example in mqtt.cpp:publish_values() for constructing the payload
+ * 
+ * Home assistant - See below for an example, and the official documentation is quite good (https://www.home-assistant.io/integrations/sensor.mqtt/)
+ * in configuration.yaml:
+ * mqtt: !include mqtt.yaml
+ * 
+ * in mqtt.yaml:
+ * sensor:
+ *   - name: "Cell max"
+ *       state_topic: "battery/info"
+ *       unit_of_measurement: "mV"
+ *       value_template: "{{ value_json.cell_max_voltage | int }}"
+ *   - name: "Cell min"
+ *       state_topic: "battery/info"
+ *       unit_of_measurement: "mV"
+ *       value_template: "{{ value_json.cell_min_voltage | int }}"
+ *   - name: "Temperature max"
+ *       state_topic: "battery/info"
+ *       unit_of_measurement: "C"
+ *       value_template: "{{ value_json.temperature_max | float }}"
+ *   - name: "Temperature min"
+ *       state_topic: "battery/info"
+ *       unit_of_measurement: "C"
+ *       value_template: "{{ value_json.temperature_min | float }}"
+ */
+
 #ifndef MQTT_H
 #define MQTT_H
 

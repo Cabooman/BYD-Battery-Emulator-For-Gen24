@@ -18,66 +18,24 @@ static unsigned long previousMillisUpdateVal;
 
 #ifdef ENABLE_MQTT
 void publish_values(void) {
-    static uint16_t SOC_Previous = SOC;
-    static uint16_t StateOfHealth_Previous = StateOfHealth;
-    static uint16_t temperature_min_Previous = temperature_min;   //C+1,  Goes thru convert2unsignedint16 function (15.0C = 150, -15.0C =  65385)
-    static uint16_t temperature_max_Previous = temperature_max;   //C+1,  Goes thru convert2unsignedint16 function (15.0C = 150, -15.0C =  65385)
-    static uint16_t cell_max_voltage_Previous = cell_max_voltage;  //mV,   0-4350
-    static uint16_t cell_min_voltage_Previous = cell_min_voltage;  //mV,   0-4350
-    static uint8_t cnt = 0u; // Counter to "force update" with some interval regardless of change in the underlying variable
 
-    /** This part below should be re-written to pack a JSON string instead, but I'm keeping this since it works as is. Some MQTT stuff in HA:
-     *  configuration.yaml:
-     *  mqtt: !include mqtt.yaml
-     * 
-     *  mqtt.yaml:
-     *  sensor:
-     *    - name: "Cell max"
-     *      state_topic: "battery/info/cell_max_voltage"
-     *      value_template: "{{ value.split()[1] | int }}"
-     *    - name: "Temperature max"
-     *      state_topic: "battery/info/temperature_max"
-     *      value_template: "{{ value.split()[1] | round(1) }}"
-    */
-
-    if((SOC != SOC_Previous) || (cnt % (10 * SECONDS) == 0u)) {
-        snprintf(msg, MSG_BUFFER_SIZE, "SOC: %.1f", ((float)SOC) / 100.0);
-        client.publish("battery/info/SOC", msg);
-        Serial.println(msg);
-        SOC_Previous = SOC;
-    }
-    if((StateOfHealth != StateOfHealth_Previous) || (cnt % (10 * SECONDS) == 0u)) {
-        snprintf(msg, MSG_BUFFER_SIZE, "StateOfHealth: %d", ((float)StateOfHealth) / 100);
-        client.publish("battery/info/StateOfHealth", msg);
-        Serial.println(msg);
-        StateOfHealth_Previous = StateOfHealth;
-    }
-    if((temperature_min != temperature_min_Previous) || (cnt % (10 * SECONDS) == 0u)) {
-        snprintf(msg, MSG_BUFFER_SIZE, "temperature_min: %.1f", ((float)((int16_t)temperature_min)) / 10.0);
-        client.publish("battery/info/temperature_min", msg);
-        Serial.println(msg);
-        temperature_min_Previous = temperature_min;
-    }
-    if((temperature_max != temperature_max_Previous) || (cnt % (10 * SECONDS) == 0u)) {
-        snprintf(msg, MSG_BUFFER_SIZE, "temperature_max: %.1f", ((float)((int16_t)temperature_max)) / 10.0);
-        client.publish("battery/info/temperature_max", msg);
-        Serial.println(msg);
-        temperature_max_Previous = temperature_max;
-    }
-    if((cell_max_voltage != cell_max_voltage_Previous) || (cnt % (10 * SECONDS) == 0u)) {
-        snprintf(msg, MSG_BUFFER_SIZE, "cell_max_voltage: %d mV", cell_max_voltage);
-        client.publish("battery/info/cell_max_voltage", msg);
-        Serial.println(msg);
-        cell_max_voltage_Previous = cell_max_voltage;
-    }
-    if((cell_min_voltage != cell_min_voltage_Previous) || (cnt % (10 * SECONDS) == 0u)) {
-        snprintf(msg, MSG_BUFFER_SIZE, "cell_min_voltage: %d mV", cell_min_voltage);
-        client.publish("battery/info/cell_min_voltage", msg);
-        Serial.println(msg);
-        cell_min_voltage_Previous = cell_min_voltage;
-    }
-    
-    cnt++;
+    snprintf(msg, sizeof(msg),
+           "{\n"
+           "  \"SOC\": %.3f,\n"
+           "  \"StateOfHealth\": %.3f,\n"
+           "  \"temperature_min\": %.3f,\n"
+           "  \"temperature_max\": %.3f,\n"
+           "  \"cell_max_voltage\": %.3f,\n"
+           "  \"cell_min_voltage\": %.3f\n"
+           "}\n",
+           ((float) SOC) / 100.0,
+           ((float) StateOfHealth) / 100.0,
+           ((float)((int16_t) temperature_min)) / 10.0,
+           ((float)((int16_t) temperature_max)) / 10.0,
+           cell_max_voltage,
+           cell_min_voltage);
+    client.publish("battery/info", msg);
+    Serial.println(msg);
 }
 
 void setup_wifi(void) {
@@ -162,7 +120,7 @@ void mqtt_loop(void) {
 #ifdef ENABLE_MQTT
     reconnect();
     client.loop();
-    if (millis() - previousMillisUpdateVal >= 200)  // Every 0.2s
+    if (millis() - previousMillisUpdateVal >= 5000)  // Every 5s
     {
         previousMillisUpdateVal = millis();
         publish_values();  // Update values heading towards inverter. Prepare for sending on CAN, or write directly to Modbus.
