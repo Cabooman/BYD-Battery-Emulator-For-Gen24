@@ -9,7 +9,7 @@ const char* sub_strings[] = MQTT_SUBSCRIPTIONS;
 
 WiFiClient espClient;
 PubSubClient client(espClient);
-#define MSG_BUFFER_SIZE (50)
+#define MSG_BUFFER_SIZE (256)
 char msg[MSG_BUFFER_SIZE];
 int value = 0;
 static unsigned long previousMillisUpdateVal;
