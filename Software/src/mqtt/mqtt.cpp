@@ -40,6 +40,7 @@ void publish_values(void) {
 }
 
 void setup_wifi(void) {
+    uint8_t wifi_timeout = 0u;
     delay(10);
     // We start by connecting to a WiFi network
     Serial.println();
@@ -53,6 +54,11 @@ void setup_wifi(void) {
     {
         delay(500);
         Serial.print(".");
+        if(++wifi_timeout > 20u) {
+            /* Timeout after 10 s */
+            Serial.println("Could not connect to wifi, check settings in USER_SETTINGS.h");
+            return;
+        }
     }
 
     randomSeed(micros());
