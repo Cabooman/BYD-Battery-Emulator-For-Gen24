@@ -1,4 +1,7 @@
 # THIS IS AN MQTT FORK!
+Use at your own risk.
+There is currently an unknown bug causing the lilygo to hang, while reporting the latest known values on MODBUS RTU and not updating values over MQTT
+
 ## Todo
 - DONE - Verify compilation with older board package
 - Verify battery temperature values at negative temperatures
