@@ -30,6 +30,7 @@ static uint32_t total_discharge = 0;
 static uint32_t total_charge = 0;
 static uint16_t volts = 0;     // V
 static int16_t amps = 0;       // A
+static int16_t power = 0;      // W
 static uint16_t raw_amps = 0;  // A
 static int16_t max_temp = 6;   // C*
 static int16_t min_temp = 5;   // C*
@@ -175,14 +176,12 @@ void update_values_tesla_model_3_battery() {  //This function maps all the value
 
   battery_voltage = (volts * 10);  //One more decimal needed (370 -> 3700)
 
-  battery_current = (amps * 10);  //Increase decimal (13A -> 13.0A)
+  battery_current = convert2unsignedInt16(amps);  //13.0A
 
-  capacity_Wh = (nominal_full_pack_energy * 100);  //Scale up 75.2kWh -> 75200Wh
-  if (capacity_Wh > 60000) {
-    capacity_Wh = 60000;
-  }
+  capacity_Wh = BATTERY_WH_MAX;  //Use the configured value to avoid overflows
 
-  remaining_capacity_Wh = (expected_energy_remaining * 100);  //Scale up 60.3kWh -> 60300Wh
+  //Calculate the remaining Wh amount from SOC% and max Wh value.
+  remaining_capacity_Wh = remaining_capacity_Wh = static_cast<int>((static_cast<double>(SOC) / 10000) * BATTERY_WH_MAX);
 
   // Define the allowed discharge power
   max_target_discharge_power = (max_discharge_current * volts);
@@ -202,7 +201,8 @@ void update_values_tesla_model_3_battery() {  //This function maps all the value
     max_target_charge_power = MAXCHARGEPOWERALLOWED;
   }
 
-  stat_batt_power = (volts * amps);  //TODO: check if scaling is OK
+  power = ((volts / 10) * amps);
+  stat_batt_power = convert2unsignedInt16(power);
 
   min_temp = (min_temp * 10);
   temperature_min = convert2unsignedInt16(min_temp);
@@ -243,6 +243,15 @@ void update_values_tesla_model_3_battery() {  //This function maps all the value
     }
   }
 
+  //Check if SOC% is plausible
+  if (battery_voltage >
+      (ABSOLUTE_MAX_VOLTAGE - 100)) {  // When pack voltage is close to max, and SOC% is still low, raise FAULT
+    if (SOC < 6500) {                  //When SOC is less than 65.00% when approaching max voltage
+      bms_status = FAULT;
+      Serial.println("ERROR: SOC% reported by battery not plausible. Restart battery!");
+    }
+  }
+
   if (LFP_Chemistry) {  //LFP limits used for voltage safeties
     if (cell_max_v >= MAX_CELL_VOLTAGE_LFP) {
       bms_status = FAULT;
@@ -271,6 +280,11 @@ void update_values_tesla_model_3_battery() {  //This function maps all the value
     }
   }
 
+  if (bms_status == FAULT) {  //Incase we enter a critical fault state, zero out the allowed limits
+    max_target_charge_power = 0;
+    max_target_discharge_power = 0;
+  }
+
   /* Safeties verified. Perform USB serial printout if configured to do so */
 
 #ifdef DEBUG_VIA_USB
@@ -296,7 +310,7 @@ void update_values_tesla_model_3_battery() {  //This function maps all the value
   Serial.print("Real SOC: ");
   Serial.print(soc_vi);
   print_int_with_units(", Battery voltage: ", volts, "V");
-  print_int_with_units(", Battery current: ", amps, "A");
+  print_int_with_units(", Battery current: ", (amps * 0.1), "A");
   Serial.println("");
   print_int_with_units("Discharge limit battery: ", discharge_limit, "kW");
   Serial.print(", ");
@@ -306,9 +320,9 @@ void update_values_tesla_model_3_battery() {  //This function maps all the value
     Serial.print("YES, ");
   else
     Serial.print("NO, ");
-  print_int_with_units("Min voltage allowed: ", min_voltage, "V");
-  Serial.print(", ");
-  print_int_with_units("Max voltage allowed: ", max_voltage, "V");
+  if (LFP_Chemistry) {
+    Serial.print("LFP chemistry detected!");
+  }
   Serial.println("");
   Serial.print("Cellstats, Max: ");
   Serial.print(cell_max_v);
@@ -382,12 +396,8 @@ void receive_can_tesla_model_3_battery(CAN_frame_t rx_frame) {
       break;
     case 0x132:
       //battery amps/volts
-      volts = ((rx_frame.data.u8[1] << 8) | rx_frame.data.u8[0]) * 0.01;  //Example 37030mv * 0.01 = 370V
-      amps = ((rx_frame.data.u8[3] << 8) | rx_frame.data.u8[2]);          //Example 65492 (-4.3A) OR 225 (22.5A)
-      if (amps > 32768) {
-        amps = -(65535 - amps);
-      }
-      amps = amps * 0.1;
+      volts = ((rx_frame.data.u8[1] << 8) | rx_frame.data.u8[0]) * 0.01;      //Example 37030mv * 0.01 = 370V
+      amps = ((rx_frame.data.u8[3] << 8) | rx_frame.data.u8[2]);              //Example 65492 (-4.3A) OR 225 (22.5A)
       raw_amps = ((rx_frame.data.u8[5] << 8) | rx_frame.data.u8[4]) * -0.05;  //Example 10425 * -0.05 = ?
       battery_charge_time_remaining =
           (((rx_frame.data.u8[7] & 0x0F) << 8) | rx_frame.data.u8[6]) * 0.1;  //Example 228 * 0.1 = 22.8min
@@ -518,14 +528,18 @@ the first, for a few cycles, then stop all  messages which causes the contactor 
   if (currentMillis - previousMillis30 >= interval30) {
     previousMillis30 = currentMillis;
 
-    if (bms_status == ACTIVE) {
-      send221still = 50;
-      ESP32Can.CANWriteFrame(&TESLA_221_1);
-      ESP32Can.CANWriteFrame(&TESLA_221_2);
-    } else {  //bms_status == FAULT
-      if (send221still > 0) {
+    if (inverterAllowsContactorClosing == 1) {
+      if (bms_status == ACTIVE) {
+        send221still = 50;
+        batteryAllowsContactorClosing = true;
         ESP32Can.CANWriteFrame(&TESLA_221_1);
-        send221still--;
+        ESP32Can.CANWriteFrame(&TESLA_221_2);
+      } else {  //bms_status == FAULT or inverter requested opening contactors
+        if (send221still > 0) {
+          batteryAllowsContactorClosing = false;
+          ESP32Can.CANWriteFrame(&TESLA_221_1);
+          send221still--;
+        }
       }
     }
   }
