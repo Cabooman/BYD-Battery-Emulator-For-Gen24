@@ -42,18 +42,18 @@
 //#define CONTACTOR_CONTROL     //Enable this line to have pins 25,32,33 handle automatic precharge/contactor+/contactor- closing sequence
 //#define PWM_CONTACTOR_CONTROL //Enable this line to use PWM logic for contactors, which lower power consumption and heat generation
 //#define DUAL_CAN              //Enable this line to activate an isolated secondary CAN Bus using add-on MCP2515 controller (Needed for FoxESS inverters)
-////#define SERIAL_LINK_RECEIVER  //Enable this line to receive battery data over RS485 pins from another Lilygo (This LilyGo interfaces with inverter)
+//#define SERIAL_LINK_RECEIVER  //Enable this line to receive battery data over RS485 pins from another Lilygo (This LilyGo interfaces with inverter)
 //#define SERIAL_LINK_TRANSMITTER  //Enable this line to send battery data over RS485 pins to another Lilygo (This LilyGo interfaces with battery)
-//#define WEBSERVER  //Enable this line to enable WiFi, and to run the webserver. See USER_SETTINGS.cpp for the Wifi settings.
+#define WEBSERVER  //Enable this line to enable WiFi, and to run the webserver. See USER_SETTINGS.cpp for the Wifi settings.
 
 /* MQTT options, see mqtt.h for more information */
 #define ENABLE_MQTT
 #define WIFI_SSID           "comhem_F0A1A5"
-#define WIFI_PSW            "3027CCA803"
+#define WIFI_PSW            ""
 #define MQTT_SERVER         "192.168.68.83"
 #define MQTT_PORT           1883
 #define MQTT_USER           "homeassistant"
-#define MQTT_PSW            "Fee2aelie8hoofeuco1eijaiweefaeLevahYohheighaichahlooshaegham7ix7"
+#define MQTT_PSW            ""
 #define MQTT_SUBSCRIPTIONS  {"loads/vvb/target", "topics/topic2"}
 
 #endif
