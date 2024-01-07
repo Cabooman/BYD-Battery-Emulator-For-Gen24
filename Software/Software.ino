@@ -14,10 +14,15 @@
 #include "src/lib/miwagner-ESP32-Arduino-CAN/CAN_config.h"
 #include "src/lib/miwagner-ESP32-Arduino-CAN/ESP32CAN.h"
 #include "src/mqtt/mqtt.h"
+#include <esp_task_wdt.h>
 
 #ifdef WEBSERVER
 #include "src/devboard/webserver/webserver.h"
 #endif
+
+// Watchdog
+#define WDT_TIMEOUT 3
+int last = millis();
 
 // Interval settings
 int intervalUpdateValues = 4800;  // Interval at which to update inverter values / Modbus registers
@@ -131,6 +136,10 @@ void setup() {
   inform_user_on_battery();
 
   mqtt_setup();
+  // xTaskCreate((TaskFunction_t)mqtt_loop, "MQTT", 8*1024, NULL, 1, NULL); // Priority 1 or any other number.
+  
+  esp_task_wdt_init(WDT_TIMEOUT, true); //enable panic so ESP32 restarts
+  esp_task_wdt_add(NULL); //add current thread to WDT watch
 }
 
 // Perform main program functions
@@ -169,6 +178,13 @@ void loop() {
 #endif
 
   mqtt_loop();
+
+  // resetting WDT twice during the watchdog reset period
+  if (millis() - last >= (1000 * WDT_TIMEOUT / 2)) {
+      Serial.println("Resetting WDT...");
+      esp_task_wdt_reset();
+      last = millis();
+  }
 }
 
 // Initialization functions

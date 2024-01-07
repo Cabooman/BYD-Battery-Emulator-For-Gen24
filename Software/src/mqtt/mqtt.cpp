@@ -86,6 +86,12 @@ void reconnect() {
     // Loop until we're reconnected
     while (!client.connected())
     {
+        if(WiFi.status() != WL_CONNECTED) {
+            bool result = WiFi.reconnect();
+            if (result == false) {
+                break;
+            }
+        }
         Serial.print("Attempting MQTT connection...");
         // Create a random client ID
         String clientId = "LilyGoClient-";
@@ -125,12 +131,17 @@ void mqtt_setup(void) {
 
 void mqtt_loop(void) {
 #ifdef ENABLE_MQTT
-    reconnect();
-    client.loop();
-    if (millis() - previousMillisUpdateVal >= 5000)  // Every 5s
-    {
-        previousMillisUpdateVal = millis();
-        publish_values();  // Update values heading towards inverter. Prepare for sending on CAN, or write directly to Modbus.
-    }
+    // while(true) {
+        reconnect();
+        if(client.connected() && (WiFi.status() == WL_CONNECTED)) {
+            client.loop();
+            if (millis() - previousMillisUpdateVal >= 5000)  // Every 5s
+            {
+                previousMillisUpdateVal = millis();
+                publish_values();  // Update values heading towards inverter. Prepare for sending on CAN, or write directly to Modbus.
+            }
+        }
+        delay(1);
+    // }
 #endif
 }

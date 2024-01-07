@@ -10,14 +10,14 @@
 //#define CHADEMO_BATTERY
 //#define IMIEV_CZERO_ION_BATTERY
 //#define KIA_HYUNDAI_64_BATTERY
-//#define NISSAN_LEAF_BATTERY
+#define NISSAN_LEAF_BATTERY
 //#define RENAULT_ZOE_BATTERY
 //#define TESLA_MODEL_3_BATTERY
 //#define TEST_FAKE_BATTERY
 
 /* Select inverter communication protocol. See Wiki for which to use with your inverter: https://github.com/dalathegreat/BYD-Battery-Emulator-For-Gen24/wiki */
 //#define BYD_CAN          //Enable this line to emulate a "BYD Battery-Box Premium HVS" over CAN Bus
-//#define BYD_MODBUS       //Enable this line to emulate a "BYD 11kWh HVM battery" over Modbus RTU
+#define BYD_MODBUS       //Enable this line to emulate a "BYD 11kWh HVM battery" over Modbus RTU
 //#define LUNA2000_MODBUS  //Enable this line to emulate a "Luna2000 battery" over Modbus RTU
 //#define PYLON_CAN        //Enable this line to emulate a "Pylontech battery" over CAN bus
 //#define SMA_CAN          //Enable this line to emulate a "BYD Battery-Box H 8.9kWh, 7 mod" over CAN bus
@@ -46,12 +46,12 @@
 
 /* MQTT options, see mqtt.h for more information */
 #define ENABLE_MQTT
-#define WIFI_SSID           "my_ssid"
-#define WIFI_PSW            "my_s3cr3t_p4assw0rd"
-#define MQTT_SERVER         "192.168.xx.xyy"
+#define WIFI_SSID           "comhem_F0A1A5"
+#define WIFI_PSW            "3027CCA803"
+#define MQTT_SERVER         "192.168.68.83"
 #define MQTT_PORT           1883
-#define MQTT_USER           "mqtt_user"
-#define MQTT_PSW            "longassmqttbrokerpassword"
-#define MQTT_SUBSCRIPTIONS  {"nuclear_missile/readiness", "topics/topic2", "something/else"}
+#define MQTT_USER           "homeassistant"
+#define MQTT_PSW            "Fee2aelie8hoofeuco1eijaiweefaeLevahYohheighaichahlooshaegham7ix7"
+#define MQTT_SUBSCRIPTIONS  {"loads/vvb/target", "topics/topic2"}
 
 #endif
