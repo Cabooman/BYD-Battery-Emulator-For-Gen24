@@ -336,3 +336,8 @@ void onOTAEnd(bool success) {
   }
   // <Add your own code here>
 }
+
+bool getWiFiStatus(void) {
+  return (WiFi.status() == WL_CONNECTED);
+}
+

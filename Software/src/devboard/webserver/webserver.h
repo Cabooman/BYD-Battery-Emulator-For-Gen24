@@ -101,10 +101,19 @@ void onOTAProgress(size_t current, size_t final);
 /**
  * @brief Executes on OTA end 
  *
- * @param[in] void
+ * @param[in] bool success: success = true, failed = false
  * 
- * @return bool success: success = true, failed = false
+ * @return void
  */
 void onOTAEnd(bool success);
+
+/**
+ * @brief Returns the WiFi connections status
+ *
+ * @param[in] void
+ * 
+ * @return bool success: success = connected, failed = disconnected
+ */
+bool getWiFiStatus(void);
 
 #endif
